@@ -1,1 +1,1 @@
-# some wallper, picture and video 
+# some wallpaper, picture and video 
