@@ -1,0 +1,30 @@
+INSERT INTO farmer.order_flow_operation
+(order_flow_operation_id, name, order_status, payment_type, next_executable_operation, next_changeable_status)
+VALUES(5, '已关闭', 4, 0, NULL, NULL);
+INSERT INTO farmer.order_flow_operation
+(order_flow_operation_id, name, order_status, payment_type, next_executable_operation, next_changeable_status)
+VALUES(16, '备货中', 8, 0, '8,12', '4,9');
+INSERT INTO farmer.order_flow_operation
+(order_flow_operation_id, name, order_status, payment_type, next_executable_operation, next_changeable_status)
+VALUES(4, '待支付', 3, 0, '4,5,6', '5,2,4');
+INSERT INTO farmer.order_flow_operation
+(order_flow_operation_id, name, order_status, payment_type, next_executable_operation, next_changeable_status)
+VALUES(8, '完成', 10, 0, NULL, NULL);
+INSERT INTO farmer.order_flow_operation
+(order_flow_operation_id, name, order_status, payment_type, next_executable_operation, next_changeable_status)
+VALUES(3, '买家取消接单', 2, 0, NULL, NULL);
+INSERT INTO farmer.order_flow_operation
+(order_flow_operation_id, name, order_status, payment_type, next_executable_operation, next_changeable_status)
+VALUES(17, '待提货', 9, 0, '8,13', '4,10');
+INSERT INTO farmer.order_flow_operation
+(order_flow_operation_id, name, order_status, payment_type, next_executable_operation, next_changeable_status)
+VALUES(7, '待收货', 6, 0, '9, 10', '10,10');
+INSERT INTO farmer.order_flow_operation
+(order_flow_operation_id, name, order_status, payment_type, next_executable_operation, next_changeable_status)
+VALUES(2, '拒绝接单', 1, 0, NULL, NULL);
+INSERT INTO farmer.order_flow_operation
+(order_flow_operation_id, name, order_status, payment_type, next_executable_operation, next_changeable_status)
+VALUES(6, '待发货', 5, 0, '7,8', '6,4');
+INSERT INTO farmer.order_flow_operation
+(order_flow_operation_id, name, order_status, payment_type, next_executable_operation, next_changeable_status)
+VALUES(1, '待接单', 0, 0, '0,1,2,3', '1,2,4,3');

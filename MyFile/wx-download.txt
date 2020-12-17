@@ -1,0 +1,315 @@
+// pages/certification/certification.js
+Page({
+  data: {
+    photo: '',
+    passengerName: '郑和慧子',
+    passengerNameFocused: false,
+    showCertification: true,
+    coverWidth: 100,
+    coverHeight: 100,
+    detail: {
+      post_title: '1111111111111'
+    }
+  },
+  onLoad: function (options) {
+    const query = wx.createSelectorQuery()
+    query.select('#myCanvas')
+      .fields({ node: true, size: true })
+      .exec((res) => {
+        const canvas = res[0].node
+        const ctx = canvas.getContext('2d')
+
+        const dpr = wx.getSystemInfoSync().pixelRatio
+        canvas.width = res[0].width * dpr
+        canvas.height = res[0].height * dpr
+        ctx.scale(dpr, dpr)
+
+        const date = new Date;
+        const year = date.getFullYear();
+        const month = date.getMonth() + 1;
+        const day = date.getDate();
+        const time = year + '.' + month + '.' + day;
+        const name = 'aaaaaaaaaaaaaaaaaaaaaa';
+        const coverWidth = this.data.coverWidth; // 封面图的宽度 裁剪需要
+        const coverHeight = this.data.coverHeight; // 封面图的宽度 裁剪需要
+        let passengerName = this.data.passengerName;  //用户昵称
+        const explain = 'Hi,你好呀';
+        // 截取昵称 超出省略。。。
+        if (passengerName.length > 16) {   //用户昵称显示一行 截取
+          passengerName = passengerName.slice(0, 9) + '...'
+        };
+        ctx.save()
+        let bg = canvas.createImage();
+        bg.src = '/images/certification/bg.png';
+        // canvas 背景颜色设置不成功，只好用白色背景图
+        bg.onload = () => {
+          ctx.drawImage(bg, 0, 0, 300, 500);
+
+          let zzxIcon = canvas.createImage();
+          zzxIcon.src = '/images/zzx_icon.png';
+          zzxIcon.onload = () => {
+            //绘制logo
+            ctx.drawImage(zzxIcon, 140, 25, 128, 34);
+          }
+
+          // 绘制时间
+          ctx.font = '12px sans-serif';
+          ctx.textAlign = 'right';
+          const metrics = ctx.measureText(time).width;   //时间文字的所占宽度
+          ctx.fillText(time, 266, 78, metrics + 5);
+          // 绘制 封面图并裁剪（这里图片确定是按100%宽度，同时高度按比例截取，否则图片将会变形）
+          // 裁剪位置  图片上的坐标  x:0 ,y: (coverHeight - 129 * coverWidth / 252) / 2
+          // 图片比例 255:129   图片宽度按原图宽度即coverWidth  图片高度按129*coverWidth/252
+          // 开始绘图的位置  16, 94
+          // 裁剪框的大小，即需要图片的大小 252, 129
+          let pic = canvas.createImage();
+          pic.src = '/images/zzx_icon.png';
+          pic.onload = () => {
+            ctx.drawImage(pic, 0, (coverHeight - 129 * coverWidth / 252) / 2, coverWidth, 129*coverWidth/252 , 16, 94, 252, 129);
+          }
+
+
+          // 绘制标题
+          ctx.font = 'normal bold 14px sans-serif';
+          ctx.textAlign = 'left';
+          const nameWidth = ctx.measureText(name).width;
+          // 标题换行  16是自已定的，为字体的高度
+          this.wordsWrap(ctx, name, nameWidth, 252, 16, 252, 16);
+          // 计算标题所占高度
+          const titleHight = Math.ceil(nameWidth / 252) * 16;
+          // 绘制头像和昵称
+          ctx.arc(36, 268 + titleHight, 20, 0, 2 * Math.PI);
+          ctx.clip()
+          let seal = canvas.createImage();
+          seal.src = 'https://zgyn-qa.oss-cn-huhehaote.aliyuncs.com/goods/image/2020-9-28/397c3700015211eba38c65b8d1ca9289-thumb.jpg';
+          seal.onload = () => {
+            ctx.drawImage(seal, 16, 248 + titleHight, 40, 44);
+          }
+          ctx.restore();
+          ctx.font = 'normal normal 14px sans-serif';
+          ctx.textAlign = 'left';
+          ctx.fillStyle = '#bbbbbb'
+          ctx.fillText(passengerName, 70, 270 + titleHight);
+          // 二维码描述  及图片
+          ctx.strokeStyle = '#eeeeee';
+          ctx.strokeRect(16, 300 + titleHight, 252, 80);
+          ctx.fillStyle = '#333333'
+          ctx.fillText(explain.slice(0, 11), 30, 336 + titleHight);   // 描述截取换行
+          ctx.fillText(explain.slice(11), 30, 358 + titleHight);
+
+          let code = canvas.createImage();
+          code.src = 'https://zgyn-qa.oss-cn-huhehaote.aliyuncs.com/goods/image/2020-9-28/397c3700015211eba38c65b8d1ca9289-thumb.jpg';
+          code.onload = () => {
+            ctx.drawImage(code, 194, 308 + titleHight, 44, 44);
+          }
+          ctx.font = '10px sans-serif';
+          ctx.fillStyle = '#bbbbbb'
+          ctx.fillText('长按扫码查看详情', 175, 370 + titleHight);
+
+          wx.canvasToTempFilePath({
+            canvasId: 'myCanvas',
+            canvas: canvas,
+            success: (res) => {
+              this.setData({
+                pic: res.tempFilePath
+              })
+              console.log(res);
+            },
+            fail: (res) => {
+              console.log(res);
+            }
+          }, this)
+        }
+      })
+  },
+  returnPrePage () {
+    wx.navigateBack({
+       delta: 1
+    });
+  },
+  takePhoto () {
+    wx.chooseImage({
+      count: 1,
+      sizeType: ['original'],
+      sourceType: ['camera'],
+      success: (res) => {
+        if (res.tempFilePaths && res.tempFilePaths.length > 0) {
+          this.setData({
+            photo: res.tempFilePaths[0]
+          })
+        }
+      }
+    })
+  },
+  getPassengerName (e) {
+    this.setData({
+      passengerName: e.detail.value
+    })
+  },
+  generateCertification () {
+    if (this.data.passengerName) {
+      this.setData({
+        showCertification: true
+      })
+    } else {
+      this.setData({
+        passengerNameFocused: true
+      })
+    }
+  },
+  createdCode () {
+    let that = this;
+    const detail = this.data.detail;
+    const ctx = wx.createCanvasContext('myCanvas');    //绘图上下文
+    console.log(ctx);
+    const date = new Date;
+    const year = date.getFullYear();
+    const month = date.getMonth() + 1;
+    const day = date.getDate();
+    const time = year + '.' + month + '.' + day;   // 绘图的时间
+    const name = detail.post_title;     //绘图的标题  需要处理换行
+    const coverWidth = this.data.coverWidth; // 封面图的宽度 裁剪需要
+    const coverHeight = this.data.coverHeight; // 封面图的宽度 裁剪需要
+    let pichName = this.data.passengerName;  //用户昵称
+    const explain = 'Hi,我想分享给你一条资讯猛料!';
+    // 截取昵称 超出省略。。。
+    if (pichName.length > 16) {   //用户昵称显示一行 截取
+      pichName = pichName.slice(0, 9) + '...'
+    };
+    // 绘制logo
+    ctx.save()
+    // canvas 背景颜色设置不成功，只好用白色背景图
+    ctx.drawImage('/images/certification/certification.jpg', 0, 0, 286, 480);
+    //绘制logo
+    ctx.drawImage('/imgs/certification/certification.jpg', 140, 25, 128, 34);
+
+    // 绘制时间
+    ctx.setFontSize(12);
+    ctx.setTextAlign('right');
+    const metrics = ctx.measureText(time).width;   //时间文字的所占宽度
+    ctx.fillText(time, 266, 78, metrics + 5);
+    // 绘制 封面图并裁剪（这里图片确定是按100%宽度，同时高度按比例截取，否则图片将会变形）
+    // 裁剪位置  图片上的坐标  x:0 ,y: (coverHeight - 129 * coverWidth / 252) / 2
+    // 图片比例 255:129   图片宽度按原图宽度即coverWidth  图片高度按129*coverWidth/252
+    // 开始绘图的位置  16, 94
+    // 裁剪框的大小，即需要图片的大小 252, 129
+    ctx.drawImage(this.data.cover, 0, (coverHeight - 129 * coverWidth / 252) / 2, coverWidth, 129*coverWidth/252 , 16, 94, 252, 129);
+
+
+    // 绘制标题
+    ctx.font = 'normal bold 14px sans-serif';
+    ctx.setTextAlign('left');
+    const nameWidth = ctx.measureText(name).width;
+    // 标题换行  16是自已定的，为字体的高度
+    this.wordsWrap(ctx, name, nameWidth, 252, 16, 252, 16);
+    // 计算标题所占高度
+    const titleHight = Math.ceil(nameWidth / 252) * 16;
+    // 绘制头像和昵称
+    ctx.arc(36, 268 + titleHight, 20, 0, 2 * Math.PI);
+    ctx.clip()
+    ctx.drawImage(this.data.avatar, 16, 248 + titleHight, 40, 44);
+    ctx.restore();
+    ctx.font = 'normal normal 14px sans-serif';
+    ctx.setTextAlign('left');
+    ctx.setFillStyle('#bbbbbb')
+    ctx.fillText(pichName, 70, 270 + titleHight);
+    // 二维码描述  及图片
+    ctx.setStrokeStyle('#eeeeee');
+    ctx.strokeRect(16, 300 + titleHight, 252, 80);
+    ctx.setFillStyle('#333333')
+    ctx.fillText(explain.slice(0, 11), 30, 336 + titleHight);   // 描述截取换行
+    ctx.fillText(explain.slice(11), 30, 358 + titleHight);
+
+    ctx.drawImage(this.data.erweima, 194, 308 + titleHight, 44, 44);
+    ctx.setFontSize(10);
+    ctx.setFillStyle('#bbbbbb')
+    ctx.fillText('长按扫码查看详情', 175, 370 + titleHight);
+
+    ctx.draw()
+  },
+  // canvas 标题超出换行处理
+  wordsWrap(ctx, name, nameWidth, maxWidth, startX, srartY, wordsHight) {
+    let lineWidth = 0;
+    let lastSubStrIndex = 0;
+    for (let i = 0; i < name.length; i++) {
+      lineWidth += ctx.measureText(name[i]).width;
+      if (lineWidth > maxWidth) {
+        ctx.fillText(name.substring(lastSubStrIndex, i), startX, srartY);
+        srartY += wordsHight;
+        lineWidth = 0;
+        lastSubStrIndex = i;
+      }
+      if (i == name.length - 1) {
+        ctx.fillText(name.substring(lastSubStrIndex, i + 1), startX, srartY);
+      }
+    }
+  },
+  savePicture () {
+    wx.showToast({
+      icon: 'loading',
+      title: '正在保存图片',
+      duration: 1000
+    });
+
+    // 判断用户是否授权”保存到相册“
+    wx.getSetting({
+      success: (res) => {
+        //没有权限，发起授权
+        if (!res.authSetting['scope.writePhotosAlbum']) {
+          wx.authorize({
+            scope: 'scope.writePhotosAlbum',
+            success() {
+              //用户允许授权，保存图片到相册
+              this.savePhoto();
+            },
+            fail() {
+              //用户点击拒绝授权，跳转到设置页，引导用户授权
+              wx.openSetting({
+                success() {
+                  wx.authorize({
+                    scope: 'scope.writePhotosAlbum',
+                    success() {
+                      this.savePhoto();
+                    }
+                  })
+                }
+              })
+            }
+          });
+        } else {
+          //用户已授权，保存到相册
+          this.savePhoto()
+        }
+      }
+    });
+  },
+  savePhoto() {
+    wx.downloadFile({
+      // 图片下载地址
+      url: 'https://zgyn-qa.oss-cn-huhehaote.aliyuncs.com/goods/image/2020-9-28/397c3700015211eba38c65b8d1ca9289-thumb.jpg',
+      success: (res) => {
+        wx.saveImageToPhotosAlbum({
+          filePath: res.tempFilePath,
+          success() {
+            wx.showToast({
+              title: '保存成功',
+              icon: "success",
+              duration: 1000
+            })
+          }
+        })
+      }
+    })
+  },
+  onShareAppMessage (res) {
+    if (res.from === 'button') {
+      // 来自页面内转发按钮
+      console.log(res.target)
+    }
+    return {
+      title: '中智行',
+      path: '/page/index/index',
+      imageUrl: 'https://zgyn-qa.oss-cn-huhehaote.aliyuncs.com/goods/image/2020-9-28/397c3700015211eba38c65b8d1ca9289-thumb.jpg'
+    }
+  }
+})
